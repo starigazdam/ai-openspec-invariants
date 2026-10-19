@@ -1,0 +1,34 @@
+{
+  "name": "ai-openspec-invariants",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Thin invariant governance layer on top of OpenSpec (skeleton).",
+  "license": "MIT",
+  "type": "module",
+  "engines": {
+    "node": ">=22.18"
+  },
+  "bin": {
+    "ai-openspec-invariants": "dist/cli/index.js"
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "typecheck": "tsc -p tsconfig.json",
+    "lint": "eslint .",
+    "format:check": "prettier --check \"src/**/*.ts\" \"tests/**/*.ts\" \"scripts/**/*.mjs\" \"package.json\" \"tsconfig.json\" \"tsconfig.build.json\" \"eslint.config.js\" \".prettierrc.json\" \".github/workflows/ci.yml\" \"README.md\"",
+    "test": "npm run build && node --test \"tests/**/*.test.ts\"",
+    "pack:smoke": "node scripts/pack-smoke.mjs",
+    "verify": "npm run typecheck && npm run lint && npm run format:check && npm run test && npm run pack:smoke"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@types/node": "^26.6.5",
+    "eslint": "^10.13.0",
+    "prettier": "^3.9.10",
+    "typescript": "^6.0.3",
+    "typescript-eslint": "^8.72.0"
+  }
+}
