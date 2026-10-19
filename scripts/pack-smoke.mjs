@@ -38,8 +38,8 @@ function readExpectedVersion() {
   return raw.version;
 }
 
-const packDir = mkdtempSync(join(tmpdir(), "openspec-invariants-pack-"));
-const installDir = mkdtempSync(join(tmpdir(), "openspec-invariants-install-"));
+const packDir = mkdtempSync(join(tmpdir(), "ai-openspec-invariants-pack-"));
+const installDir = mkdtempSync(join(tmpdir(), "ai-openspec-invariants-install-"));
 
 try {
   runNpm(["pack", "--pack-destination", packDir, "--silent"], repoRoot);
@@ -59,13 +59,18 @@ try {
     installDir,
   );
 
-  const installedPackage = join(installDir, "node_modules", "openspec-invariants", "package.json");
+  const installedPackage = join(
+    installDir,
+    "node_modules",
+    "ai-openspec-invariants",
+    "package.json",
+  );
   const installed = JSON.parse(readFileSync(installedPackage, "utf8"));
   const binField = installed?.bin;
-  const binEntry = typeof binField === "string" ? binField : binField?.["openspec-invariants"];
+  const binEntry = typeof binField === "string" ? binField : binField?.["ai-openspec-invariants"];
 
   if (typeof binEntry !== "string") {
-    throw new Error("installed package does not expose the openspec-invariants bin");
+    throw new Error("installed package does not expose the ai-openspec-invariants bin");
   }
 
   const binPath = join(dirname(installedPackage), binEntry);

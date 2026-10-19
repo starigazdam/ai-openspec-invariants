@@ -57,8 +57,8 @@ at the boundary. Add a module or file only when an issue needs it.
 
 These do not block the skeleton. The maintainer must confirm them before release.
 
-- npm scope and published package name. The working name is `openspec-invariants`, marked `private`.
-- License. The working choice is `UNLICENSED`, a placeholder until a decision.
+- npm scope for publication. The package and CLI name is `ai-openspec-invariants` (decided); it stays `private` until publication is approved.
+- License: MIT (decided).
 - JSON Schema or Zod for the registry. I-02 decides.
 - JUnit and TRX identity normalization. I-05 and I-08 freeze it with real fixtures.
 - Whether the skill install is opt-in. The proposal is opt-in (`init --skill`).

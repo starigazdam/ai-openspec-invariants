@@ -1,4 +1,4 @@
-# openspec-invariants
+# ai-openspec-invariants
 
 A thin, independently installable invariant governance layer on top of OpenSpec. It owns a small,
 curated inventory of durable cross-capability guarantees, links each to one canonical OpenSpec
@@ -45,7 +45,7 @@ node dist/cli/index.js --version
 
 ## License
 
-UNLICENSED until the maintainer chooses a license.
+MIT. See [LICENSE](LICENSE).
 
 ## Documentation
 

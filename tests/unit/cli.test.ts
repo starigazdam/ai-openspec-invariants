@@ -62,7 +62,7 @@ void describe("CLI", () => {
 
     strictEqual(result.status, 0);
     strictEqual(result.stderr, "");
-    match(result.stdout, /Usage:/);
+    match(result.stdout, /Usage: ai-openspec-invariants/);
     match(result.stdout, /--help/);
     match(result.stdout, /--version/);
     match(result.stdout, /not implemented/i);

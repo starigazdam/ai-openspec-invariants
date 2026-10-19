@@ -29,9 +29,9 @@ function readVersion(): string {
 
 function usage(version: string): string {
   return [
-    `openspec-invariants ${version}`,
+    `ai-openspec-invariants ${version}`,
     "",
-    "Usage: openspec-invariants [options]",
+    "Usage: ai-openspec-invariants [options]",
     "",
     "Options:",
     "  -h, --help     Show this help message",
