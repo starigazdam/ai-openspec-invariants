@@ -1,0 +1,114 @@
+# Generated at bootstrap from the GitHub issues actually created in
+# starigazdam/ai-openspec-invariants. GitHub is the live source; update this
+# file only when the backlog structure changes.
+repository: starigazdam/ai-openspec-invariants
+milestones:
+  - number: 1
+    title: "M0 — Skeleton"
+    issues: [I-01, I-02, I-03]
+  - number: 2
+    title: "M1 — Enforced JS slice"
+    issues: [I-04, I-05, I-06, I-07, I-10]
+  - number: 3
+    title: "M2 — Audit & mixed stack"
+    issues: [I-08, I-09]
+  - number: 4
+    title: "M3 — Release readiness"
+    issues: [I-11, I-12]
+issues:
+  - id: I-01
+    number: 1
+    url: https://github.com/starigazdam/ai-openspec-invariants/issues/1
+    title: "Bootstrap package, TypeScript CLI and quality gates"
+    priority: P0
+    milestone: "M0 — Skeleton"
+    labels: [area:core, type:chore]
+    depends_on: []
+  - id: I-02
+    number: 2
+    url: https://github.com/starigazdam/ai-openspec-invariants/issues/2
+    title: "Define invariant data model, schema and fixtures"
+    priority: P0
+    milestone: "M0 — Skeleton"
+    labels: [area:core, type:feature]
+    depends_on: [I-01]
+  - id: I-03
+    number: 3
+    url: https://github.com/starigazdam/ai-openspec-invariants/issues/3
+    title: "OpenSpec adapter and current-spec inventory"
+    priority: P0
+    milestone: "M0 — Skeleton"
+    labels: [area:integration, type:feature]
+    depends_on: [I-01]
+  - id: I-04
+    number: 4
+    url: https://github.com/starigazdam/ai-openspec-invariants/issues/4
+    title: "Deterministic `check` (static integrity)"
+    priority: P0
+    milestone: "M1 — Enforced JS slice"
+    labels: [area:core, type:feature]
+    depends_on: [I-02, I-03]
+  - id: I-05
+    number: 5
+    url: https://github.com/starigazdam/ai-openspec-invariants/issues/5
+    title: "JUnit XML test-result verification"
+    priority: P0
+    milestone: "M1 — Enforced JS slice"
+    labels: [area:tests, type:feature]
+    depends_on: [I-02, I-04]
+  - id: I-06
+    number: 6
+    url: https://github.com/starigazdam/ai-openspec-invariants/issues/6
+    title: "Deterministic Markdown index generator"
+    priority: P0
+    milestone: "M1 — Enforced JS slice"
+    labels: [area:cli, type:feature]
+    depends_on: [I-02, I-03, I-04]
+  - id: I-07
+    number: 7
+    url: https://github.com/starigazdam/ai-openspec-invariants/issues/7
+    title: "Safe `init`, OpenSpec guidance and optional skill installer"
+    priority: P0
+    milestone: "M1 — Enforced JS slice"
+    labels: [area:integration, type:feature]
+    depends_on: [I-01, I-02]
+  - id: I-08
+    number: 8
+    url: https://github.com/starigazdam/ai-openspec-invariants/issues/8
+    title: ".NET TRX verification adapter"
+    priority: P1
+    milestone: "M2 — Audit & mixed stack"
+    labels: [area:tests, type:feature]
+    depends_on: [I-05]
+  - id: I-09
+    number: 9
+    url: https://github.com/starigazdam/ai-openspec-invariants/issues/9
+    title: "Deterministic `audit export` and read-only AI audit skill"
+    priority: P1
+    milestone: "M2 — Audit & mixed stack"
+    labels: [area:integration, type:feature]
+    depends_on: [I-03, I-07]
+  - id: I-10
+    number: 10
+    url: https://github.com/starigazdam/ai-openspec-invariants/issues/10
+    title: "CI examples and end-to-end consumer repos"
+    priority: P0
+    milestone: "M1 — Enforced JS slice"
+    labels: [area:integration, type:chore]
+    depends_on: [I-04, I-05, I-06, I-07]
+  - id: I-11
+    number: 11
+    url: https://github.com/starigazdam/ai-openspec-invariants/issues/11
+    title: "Documentation, security audit and pre-release packaging"
+    priority: P1
+    milestone: "M3 — Release readiness"
+    labels: [area:docs, type:chore]
+    depends_on: [I-05, I-06, I-07, I-09, I-10]
+  - id: I-12
+    number: 12
+    url: https://github.com/starigazdam/ai-openspec-invariants/issues/12
+    title: "Brownfield adoption playbook and hard-gate demonstration"
+    priority: P1
+    milestone: "M3 — Release readiness"
+    labels: [area:docs, type:feature]
+    depends_on: [I-08, I-09, I-10]
