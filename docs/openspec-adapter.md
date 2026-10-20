@@ -24,11 +24,22 @@ The adapter uses only the JSON output from these commands.
 ## How the adapter finds the CLI
 
 The adapter uses the project-local `@fission-ai/openspec` package.
+It does not use `require.resolve`, because the package `exports` map can hide `package.json`.
 
-1. It resolves `@fission-ai/openspec/package.json` from `<projectRoot>/package.json`.
-2. It reads the `bin.openspec` field.
-3. It runs `process.execPath` with that file and the arguments. It does not use a shell, `PATH`,
+1. It starts at `<projectRoot>`.
+2. It checks `<dir>/node_modules/@fission-ai/openspec/package.json`.
+3. It goes up one directory and repeats. It stops at the filesystem root. The first package
+   `package.json` wins.
+4. It reads the `bin.openspec` field. A string `bin` field also works.
+5. It resolves the bin path from the package directory.
+6. It rejects an absolute bin path or a bin path with `..`.
+7. It runs `process.execPath` with that file and the arguments. It does not use a shell, `PATH`,
    or `npx`.
+
+If no package is found, the adapter reports `OPENSPEC_NOT_FOUND`.
+The message tells the user to install the package as a devDependency.
+A package with no usable bin also reports `OPENSPEC_NOT_FOUND`.
+The message names the problem.
 
 Install the package as a devDependency in each consumer project.
 
@@ -59,7 +70,7 @@ capability.
 
 | Code | Meaning |
 | --- | --- |
-| `OPENSPEC_NOT_FOUND` | The package is not resolvable, or the spawn failed with `ENOENT`. |
+| `OPENSPEC_NOT_FOUND` | The package is not found, has no usable bin, or the spawn failed with `ENOENT`. |
 | `OPENSPEC_CLI_FAILED` | The command exited with a nonzero status, a signal, or a timeout. |
 | `OPENSPEC_VERSION_UNSUPPORTED` | The version is outside `>=1.14.0 <2.0.0`. |
 | `OPENSPEC_OUTPUT_MALFORMED` | The output is not JSON or does not have the required shape. |

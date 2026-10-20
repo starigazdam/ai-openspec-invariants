@@ -1,7 +1,6 @@
 import { spawnSync } from "node:child_process";
-import { readFileSync } from "node:fs";
-import { createRequire } from "node:module";
-import { dirname, join } from "node:path";
+import { readFileSync, statSync } from "node:fs";
+import { dirname, isAbsolute, join, relative, resolve, sep } from "node:path";
 
 const SUPPORTED_RANGE = ">=1.14.0 <2.0.0";
 const DEFAULT_TIMEOUT_MS = 120_000;
@@ -76,19 +75,92 @@ function errorCode(error: Error): string | undefined {
 
 function isNotFound(error: Error): boolean {
   const code = errorCode(error);
-  return code === "ENOENT" || code === "MODULE_NOT_FOUND";
+  return code === "ENOENT" || code === "MODULE_NOT_FOUND" || code === "OPENSPEC_NOT_FOUND";
+}
+
+function isRegularFile(path: string): boolean {
+  try {
+    return statSync(path).isFile();
+  } catch {
+    return false;
+  }
+}
+
+function findPackageDir(projectRoot: string): string | undefined {
+  let current = resolve(projectRoot);
+
+  while (true) {
+    const packageDir = join(current, "node_modules", "@fission-ai", "openspec");
+    if (isRegularFile(join(packageDir, "package.json"))) {
+      return packageDir;
+    }
+
+    const parent = dirname(current);
+    if (parent === current) {
+      return undefined;
+    }
+    current = parent;
+  }
+}
+
+function resolutionError(message: string): Error {
+  return Object.assign(new Error(message), { code: "OPENSPEC_NOT_FOUND" });
+}
+
+function readBinName(manifest: Record<string, unknown>): string {
+  if (typeof manifest.bin === "string" && manifest.bin !== "") {
+    return manifest.bin;
+  }
+
+  if (
+    isRecord(manifest.bin) &&
+    typeof manifest.bin.openspec === "string" &&
+    manifest.bin.openspec !== ""
+  ) {
+    return manifest.bin.openspec;
+  }
+
+  throw resolutionError(`${PACKAGE_NAME} package.json does not define a usable bin.openspec entry`);
 }
 
 function resolveBinPath(projectRoot: string): string {
-  const requireFromProject = createRequire(join(projectRoot, "package.json"));
-  const packageJsonPath = requireFromProject.resolve(`${PACKAGE_NAME}/package.json`);
-  const parsed: unknown = JSON.parse(readFileSync(packageJsonPath, "utf8"));
-
-  if (!isRecord(parsed) || !isRecord(parsed.bin) || typeof parsed.bin.openspec !== "string") {
-    throw new Error(`${PACKAGE_NAME} package.json does not define bin.openspec`);
+  const packageDir = findPackageDir(projectRoot);
+  if (packageDir === undefined) {
+    throw resolutionError(
+      `Cannot find ${PACKAGE_NAME} in this project or a parent directory. ` +
+        `Install it as a devDependency: npm install --save-dev ${PACKAGE_NAME}`,
+    );
   }
 
-  return join(dirname(packageJsonPath), parsed.bin.openspec);
+  const packageJsonPath = join(packageDir, "package.json");
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(readFileSync(packageJsonPath, "utf8"));
+  } catch (error: unknown) {
+    throw resolutionError(`Cannot read ${packageJsonPath}: ${toError(error).message}`);
+  }
+
+  if (!isRecord(parsed)) {
+    throw resolutionError(`${packageJsonPath} is not a JSON object`);
+  }
+
+  const bin = readBinName(parsed);
+  const binPath = join(packageDir, bin);
+  const relativePath = relative(packageDir, binPath);
+
+  if (
+    isAbsolute(bin) ||
+    relativePath === "" ||
+    relativePath === ".." ||
+    relativePath.startsWith(`..${sep}`)
+  ) {
+    throw resolutionError(
+      `${PACKAGE_NAME} package.json defines bin.openspec as "${bin}", ` +
+        `which is outside the package directory`,
+    );
+  }
+
+  return binPath;
 }
 
 export function createDefaultRunner(projectRoot: string, entryPath?: string): OpenSpecRunner {
@@ -198,6 +270,12 @@ function runCommand(
   }
 
   if (result.error !== undefined && isNotFound(result.error)) {
+    if (errorCode(result.error) === "OPENSPEC_NOT_FOUND") {
+      return {
+        ok: false,
+        diagnostic: { code: "OPENSPEC_NOT_FOUND", message: result.error.message },
+      };
+    }
     return { ok: false, diagnostic: notFoundDiagnostic(command) };
   }
 

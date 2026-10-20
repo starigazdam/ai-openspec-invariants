@@ -334,33 +334,40 @@ void describe("OpenSpec adapter", () => {
     ]);
   });
 
-  function createProject(withPackage: boolean): string {
-    const root = mkdtempSync(join(tmpdir(), "ai-openspec-adapter-"));
+  function writePackage(root: string, bin: string | Record<string, string>): void {
+    const packageDir = join(root, "node_modules", "@fission-ai", "openspec");
+    mkdirSync(join(packageDir, "bin"), { recursive: true });
+    const manifest = {
+      name: "@fission-ai/openspec",
+      version: "1.14.3",
+      exports: { ".": "./index.js" },
+      bin: typeof bin === "string" ? bin : { openspec: bin.openspec },
+    };
+    writeFileSync(join(packageDir, "package.json"), `${JSON.stringify(manifest, null, 2)}\n`);
+    writeFileSync(
+      join(packageDir, "bin", "openspec.js"),
+      [
+        'const args = process.argv.slice(2).join(" ");',
+        'if (args === "--version") { process.stdout.write("1.14.3\\n"); }',
+        "else { process.stderr.write(`unexpected: ${args}\\n`); process.exitCode = 1; }",
+        "",
+      ].join("\n"),
+    );
+  }
+
+  function writeManifest(root: string): void {
     writeFileSync(
       join(root, "package.json"),
       `${JSON.stringify({ name: "fixture", private: true }, null, 2)}\n`,
     );
+  }
+
+  function createProject(withPackage: boolean): string {
+    const root = mkdtempSync(join(tmpdir(), "ai-openspec-adapter-"));
+    writeManifest(root);
 
     if (withPackage) {
-      const packageDir = join(root, "node_modules", "@fission-ai", "openspec");
-      mkdirSync(join(packageDir, "bin"), { recursive: true });
-      writeFileSync(
-        join(packageDir, "package.json"),
-        `${JSON.stringify(
-          { name: "@fission-ai/openspec", version: "1.14.3", bin: { openspec: "bin/openspec.js" } },
-          null,
-          2,
-        )}\n`,
-      );
-      writeFileSync(
-        join(packageDir, "bin", "openspec.js"),
-        [
-          'const args = process.argv.slice(2).join(" ");',
-          'if (args === "--version") { process.stdout.write("1.14.3\\n"); }',
-          "else { process.stderr.write(`unexpected: ${args}\\n`); process.exitCode = 1; }",
-          "",
-        ].join("\n"),
-      );
+      writePackage(root, { openspec: "bin/openspec.js" });
     }
 
     return root;
@@ -369,6 +376,21 @@ void describe("OpenSpec adapter", () => {
   void it("runs the project-local OpenSpec bin without a shell", (context) => {
     const root = createProject(true);
     context.after(() => rmSync(root, { recursive: true, force: true }));
+
+    const result = createDefaultRunner(root)([VERSION]);
+
+    strictEqual(result.status, 0);
+    strictEqual(result.stdout, "1.14.3\n");
+    strictEqual(result.error, undefined);
+  });
+
+  void it("finds the package in a parent node_modules directory", (context) => {
+    const parent = mkdtempSync(join(tmpdir(), "ai-openspec-adapter-parent-"));
+    context.after(() => rmSync(parent, { recursive: true, force: true }));
+    const root = join(parent, "child");
+    mkdirSync(root);
+    writeManifest(root);
+    writePackage(parent, { openspec: "bin/openspec.js" });
 
     const result = createDefaultRunner(root)([VERSION]);
 
@@ -387,5 +409,17 @@ void describe("OpenSpec adapter", () => {
     strictEqual(diagnosticOf(result).code, "OPENSPEC_NOT_FOUND");
     match(diagnosticOf(result).message, /@fission-ai\/openspec/);
     match(diagnosticOf(result).message, /devDependency/i);
+  });
+
+  void it("rejects a bin path that leaves the package directory", (context) => {
+    const root = createProject(false);
+    context.after(() => rmSync(root, { recursive: true, force: true }));
+    writePackage(root, { openspec: "../escape.js" });
+
+    const result = loadInventory(createDefaultRunner(root));
+
+    ok(!result.ok);
+    strictEqual(diagnosticOf(result).code, "OPENSPEC_NOT_FOUND");
+    match(diagnosticOf(result).message, /\.\.\/escape\.js/);
   });
 });
