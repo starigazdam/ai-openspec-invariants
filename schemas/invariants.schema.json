@@ -34,11 +34,13 @@
         },
         "title": {
           "type": "string",
-          "minLength": 1
+          "minLength": 1,
+          "pattern": "\\S"
         },
         "summary": {
           "type": "string",
-          "minLength": 1
+          "minLength": 1,
+          "pattern": "\\S"
         },
         "owner": {
           "$ref": "#/$defs/owner"
@@ -56,7 +58,7 @@
           "items": {
             "type": "string",
             "minLength": 1,
-            "pattern": "^(?![A-Za-z]:)(?!/)(?!.*//)(?!.*/$)(?!.*(?:^|/)\\.\\.?(?:/|$))[^\\\\]+$"
+            "pattern": "^(?![A-Za-z]:)(?!/)(?![\\s\\S]*//)(?![\\s\\S]*/$)(?![\\s\\S]*(?:^|/)\\.\\.?(?:/|$))[^\\\\]+$"
           },
           "uniqueItems": true
         },
@@ -80,7 +82,8 @@
         },
         "requirement": {
           "type": "string",
-          "minLength": 1
+          "minLength": 1,
+          "pattern": "\\S"
         }
       },
       "required": ["capability", "requirement"]
@@ -99,7 +102,8 @@
         },
         "case": {
           "type": "string",
-          "minLength": 1
+          "minLength": 1,
+          "pattern": "\\S"
         }
       },
       "required": ["id", "format", "case"]
@@ -114,7 +118,8 @@
         },
         "reason": {
           "type": "string",
-          "minLength": 1
+          "minLength": 1,
+          "pattern": "\\S"
         },
         "supersededBy": {
           "type": "string",

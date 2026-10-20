@@ -250,15 +250,16 @@ function validateConsumers(
   const consumers: string[] = [];
   const seen = new Set<string>();
   const items: readonly unknown[] = value;
-  items.forEach((entry, index) => {
+  for (let index = 0; index < items.length; index++) {
+    const entry = items[index];
     const entryPath = childPointer(path, index);
     if (typeof entry !== "string") {
       report("REG_WRONG_TYPE", entryPath, "Consumer must be a string.");
-      return;
+      continue;
     }
     if (!CAPABILITY_PATTERN.test(entry)) {
       report("REG_CAPABILITY_FORMAT", entryPath, `Consumer "${entry}" is not a capability name.`);
-      return;
+      continue;
     }
     if (ownerCapability !== undefined && entry === ownerCapability) {
       report("REG_OWNER_AS_CONSUMER", entryPath, `Consumer "${entry}" is the owner capability.`);
@@ -269,7 +270,7 @@ function validateConsumers(
       seen.add(entry);
     }
     consumers.push(entry);
-  });
+  }
 
   return consumers;
 }
@@ -291,15 +292,16 @@ function validateImplementation(
   const implementation: string[] = [];
   const seen = new Set<string>();
   const items: readonly unknown[] = value;
-  items.forEach((entry, index) => {
+  for (let index = 0; index < items.length; index++) {
+    const entry = items[index];
     const entryPath = childPointer(path, index);
     if (typeof entry !== "string") {
       report("REG_WRONG_TYPE", entryPath, "Implementation path must be a string.");
-      return;
+      continue;
     }
     if (!isValidRepositoryPath(entry)) {
       report("REG_PATH_INVALID", entryPath, `Path "${entry}" is not a normalized repository path.`);
-      return;
+      continue;
     }
     if (seen.has(entry)) {
       report("REG_DUPLICATE_ENTRY", entryPath, `Duplicate implementation path "${entry}".`);
@@ -307,7 +309,7 @@ function validateImplementation(
       seen.add(entry);
     }
     implementation.push(entry);
-  });
+  }
 
   return implementation;
 }
@@ -360,11 +362,12 @@ function validateTests(
 
   const tests: InvariantTest[] = [];
   const items: readonly unknown[] = value;
-  items.forEach((entry, index) => {
+  for (let index = 0; index < items.length; index++) {
+    const entry = items[index];
     const testPath = childPointer(path, index);
     if (!isRecord(entry)) {
       report("REG_NOT_OBJECT", testPath, "Test entry must be an object.");
-      return;
+      continue;
     }
 
     checkUnknownFields(entry, REGISTRY_SHAPE.test.properties, testPath, report);
@@ -395,7 +398,7 @@ function validateTests(
     if (id !== undefined && format !== undefined && testCase !== undefined) {
       tests.push({ id, format, case: testCase });
     }
-  });
+  }
 
   return tests;
 }
@@ -409,11 +412,12 @@ function validateInvariants(
   const seenIds = new Set<string>();
   const seenTestIds = new Set<string>();
 
-  items.forEach((item, index) => {
+  for (let index = 0; index < items.length; index++) {
+    const item = items[index];
     const path = pointer("invariants", index);
     if (!isRecord(item)) {
       report("REG_NOT_OBJECT", path, "Invariant must be an object.");
-      return;
+      continue;
     }
 
     checkUnknownFields(item, REGISTRY_SHAPE.invariant.properties, path, report);
@@ -465,7 +469,7 @@ function validateInvariants(
         tests,
       });
     }
-  });
+  }
 
   return invariants;
 }
@@ -503,11 +507,12 @@ function validateRetired(
   const retired: RetiredInvariant[] = [];
   const seenIds = new Set<string>();
 
-  items.forEach((item, index) => {
+  for (let index = 0; index < items.length; index++) {
+    const item = items[index];
     const path = pointer("retired", index);
     if (!isRecord(item)) {
       report("REG_NOT_OBJECT", path, "Retired entry must be an object.");
-      return;
+      continue;
     }
 
     checkUnknownFields(item, REGISTRY_SHAPE.retired.properties, path, report);
@@ -537,7 +542,7 @@ function validateRetired(
         ...(supersededBy === undefined ? {} : { supersededBy }),
       });
     }
-  });
+  }
 
   return retired;
 }

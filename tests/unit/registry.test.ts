@@ -76,6 +76,119 @@ function omit(object: Record<string, unknown>, key: string): Record<string, unkn
 
 const invalidPaths = ["../x", "/etc/x", "C:\\x", "a\\b", "a//b", "./a", "a/"];
 
+type PatternField =
+  | "invariant.id"
+  | "owner.capability"
+  | "test.id"
+  | "implementation"
+  | "title"
+  | "summary"
+  | "owner.requirement"
+  | "test.case"
+  | "retired.reason";
+
+interface PatternCase {
+  name: string;
+  field: PatternField;
+  value: string;
+  valid: boolean;
+}
+
+const patternLocations: Readonly<Record<PatternField, readonly string[]>> = {
+  "invariant.id": ["$defs", "invariant", "properties", "id"],
+  "owner.capability": ["$defs", "owner", "properties", "capability"],
+  "test.id": ["$defs", "test", "properties", "id"],
+  implementation: ["$defs", "invariant", "properties", "implementation", "items"],
+  title: ["$defs", "invariant", "properties", "title"],
+  summary: ["$defs", "invariant", "properties", "summary"],
+  "owner.requirement": ["$defs", "owner", "properties", "requirement"],
+  "test.case": ["$defs", "test", "properties", "case"],
+  "retired.reason": ["$defs", "retired", "properties", "reason"],
+};
+
+const textFields = [
+  "title",
+  "summary",
+  "owner.requirement",
+  "test.case",
+  "retired.reason",
+] as const satisfies readonly PatternField[];
+
+const patternCases: readonly PatternCase[] = [
+  { name: "invariant id", field: "invariant.id", value: "EXE-001", valid: true },
+  { name: "invariant id with newline", field: "invariant.id", value: "EXE-001\n", valid: false },
+  { name: "lowercase invariant id", field: "invariant.id", value: "exe-001", valid: false },
+  { name: "short invariant id", field: "invariant.id", value: "EXE-01", valid: false },
+  { name: "capability", field: "owner.capability", value: "execution-identity", valid: true },
+  {
+    name: "capability with newline",
+    field: "owner.capability",
+    value: "execution-identity\n",
+    valid: false,
+  },
+  { name: "uppercase capability", field: "owner.capability", value: "Exec", valid: false },
+  { name: "test id", field: "test.id", value: "EXE-001-T1", valid: true },
+  { name: "test id with newline", field: "test.id", value: "EXE-001-T1\n", valid: false },
+  { name: "path", field: "implementation", value: "src/a.ts", valid: true },
+  {
+    name: "path with newline and dot segment",
+    field: "implementation",
+    value: "a\n/../x",
+    valid: false,
+  },
+  { name: "parent path", field: "implementation", value: "../x", valid: false },
+  { name: "absolute path", field: "implementation", value: "/x", valid: false },
+  { name: "drive path", field: "implementation", value: "C:/x", valid: false },
+  { name: "backslash path", field: "implementation", value: "a\\b", valid: false },
+  { name: "double slash path", field: "implementation", value: "a//b", valid: false },
+  { name: "dot path", field: "implementation", value: "./a", valid: false },
+  { name: "trailing slash path", field: "implementation", value: "a/", valid: false },
+  ...textFields.flatMap((field): PatternCase[] => [
+    { name: `${field} text`, field, value: "x", valid: true },
+    { name: `${field} spaces`, field, value: " ", valid: false },
+    { name: `${field} whitespace`, field, value: "\t\n", valid: false },
+  ]),
+];
+
+function patternAt(schema: Record<string, unknown>, location: readonly string[]): string {
+  let node: unknown = schema;
+  for (const segment of location) {
+    node = asRecord(node, location.join("."))[segment];
+  }
+  const { pattern } = asRecord(node, location.join("."));
+  if (typeof pattern !== "string") {
+    throw new Error(`Missing pattern at ${location.join(".")}`);
+  }
+  return pattern;
+}
+
+function registryForField(field: PatternField, value: string): unknown {
+  switch (field) {
+    case "invariant.id":
+      return registry([invariant({ id: value })]);
+    case "owner.capability":
+      return registry([
+        invariant({ owner: { capability: value, requirement: "Single active execution" } }),
+      ]);
+    case "test.id":
+      return registry([invariant({ tests: [testEntry({ id: value })] })]);
+    case "implementation":
+      return registry([invariant({ implementation: [value] })]);
+    case "title":
+      return registry([invariant({ title: value })]);
+    case "summary":
+      return registry([invariant({ summary: value })]);
+    case "owner.requirement":
+      return registry([
+        invariant({ owner: { capability: "execution-identity", requirement: value } }),
+      ]);
+    case "test.case":
+      return registry([invariant({ tests: [testEntry({ case: value })] })]);
+    case "retired.reason":
+      return registry([], { retired: [{ id: "EXE-000", reason: value }] });
+  }
+}
+
 const cases: readonly Case[] = [
   {
     name: "rejects empty tests",
@@ -180,6 +293,21 @@ const cases: readonly Case[] = [
     expected: [{ code: "REG_EMPTY_STRING", path: "/invariants/0/tests/0/case" }],
   },
   {
+    name: "rejects a sparse tests array",
+    input: registry([invariant({ tests: new Array(1) })]),
+    expected: [{ code: "REG_NOT_OBJECT", path: "/invariants/0/tests/0" }],
+  },
+  {
+    name: "rejects a sparse consumers array",
+    input: registry([invariant({ consumers: new Array(1) })]),
+    expected: [{ code: "REG_WRONG_TYPE", path: "/invariants/0/consumers/0" }],
+  },
+  {
+    name: "rejects a sparse invariants array",
+    input: registry(new Array(1)),
+    expected: [{ code: "REG_NOT_OBJECT", path: "/invariants/0" }],
+  },
+  {
     name: "rejects a malformed test id",
     input: registry([invariant({ tests: [testEntry({ id: "exe-1" })] })]),
     expected: [{ code: "REG_ID_FORMAT", path: "/invariants/0/tests/0/id" }],
@@ -263,6 +391,29 @@ void describe("registry validation", () => {
       throw new Error("expected the minimal registry to be valid");
     }
     deepStrictEqual(result.registry.retired, []);
+  });
+});
+
+void describe("schema and validator pattern parity", () => {
+  void it("agrees on the shared case table", () => {
+    const schema = asRecord(
+      readJson(new URL("../../schemas/invariants.schema.json", import.meta.url)),
+      "schema",
+    );
+
+    for (const testCase of patternCases) {
+      const pattern = patternAt(schema, patternLocations[testCase.field]);
+      strictEqual(
+        new RegExp(pattern, "u").test(testCase.value),
+        testCase.valid,
+        `${testCase.name}: schema pattern`,
+      );
+      strictEqual(
+        validateRegistry(registryForField(testCase.field, testCase.value)).ok,
+        testCase.valid,
+        `${testCase.name}: validator`,
+      );
+    }
   });
 });
 
