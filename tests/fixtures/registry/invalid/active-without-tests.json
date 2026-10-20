@@ -1,0 +1,15 @@
+{
+  "version": 1,
+  "invariants": [
+    {
+      "id": "EXE-001",
+      "title": "Single active execution",
+      "summary": "A task identity must not have overlapping active executions.",
+      "owner": {
+        "capability": "execution-identity",
+        "requirement": "Single active execution"
+      },
+      "tests": []
+    }
+  ]
+}

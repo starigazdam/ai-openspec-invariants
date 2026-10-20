@@ -12,7 +12,8 @@
     "ai-openspec-invariants": "dist/cli/index.js"
   },
   "files": [
-    "dist"
+    "dist",
+    "schemas"
   ],
   "scripts": {
     "build": "tsc -p tsconfig.build.json",

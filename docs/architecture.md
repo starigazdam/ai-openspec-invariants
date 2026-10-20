@@ -21,3 +21,5 @@ decisions [§16](PROJECT_PLAN.md#decisions-for-maintainer-confirmation).
 Dependency direction: `cli` → (`integration`, `adapters`, `render`) → `core`.
 `core` imports no other module. Adapters convert external data into core types
 at the boundary. Add a module or file only when an issue needs it.
+`schemas/invariants.schema.json` is the editor-facing schema; the
+zero-dependency validator in `src/core/registry.ts` is authoritative.

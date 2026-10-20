@@ -1,0 +1,32 @@
+{
+  "version": 1,
+  "foo": true,
+  "invariants": [
+    {
+      "id": "EXE-001",
+      "title": "Single active execution",
+      "summary": "A task identity must not have overlapping active executions.",
+      "foo": true,
+      "owner": {
+        "capability": "execution-identity",
+        "requirement": "Single active execution",
+        "foo": true
+      },
+      "tests": [
+        {
+          "id": "EXE-001-T1",
+          "format": "junit",
+          "case": "ExecutionIdentityTests::concurrent_start_is_rejected",
+          "foo": true
+        }
+      ]
+    }
+  ],
+  "retired": [
+    {
+      "id": "EXE-000",
+      "reason": "Retired old guarantee",
+      "foo": true
+    }
+  ]
+}

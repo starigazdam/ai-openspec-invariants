@@ -1,0 +1,132 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Invariant registry",
+  "description": "Version 1 registry of active and retired invariants.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "version": {
+      "type": "number",
+      "const": 1
+    },
+    "invariants": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/invariant"
+      }
+    },
+    "retired": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/retired"
+      }
+    }
+  },
+  "required": ["version", "invariants"],
+  "$defs": {
+    "invariant": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Z][A-Z0-9]*-[0-9]{3,}$"
+        },
+        "title": {
+          "type": "string",
+          "minLength": 1,
+          "pattern": "\\S"
+        },
+        "summary": {
+          "type": "string",
+          "minLength": 1,
+          "pattern": "\\S"
+        },
+        "owner": {
+          "$ref": "#/$defs/owner"
+        },
+        "consumers": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$"
+          },
+          "uniqueItems": true
+        },
+        "implementation": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "pattern": "^(?![A-Za-z]:)(?!/)(?![\\s\\S]*//)(?![\\s\\S]*/$)(?![\\s\\S]*(?:^|/)\\.\\.?(?:/|$))[^\\\\]+$"
+          },
+          "uniqueItems": true
+        },
+        "tests": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/test"
+          }
+        }
+      },
+      "required": ["id", "title", "summary", "owner", "tests"]
+    },
+    "owner": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "capability": {
+          "type": "string",
+          "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$"
+        },
+        "requirement": {
+          "type": "string",
+          "minLength": 1,
+          "pattern": "\\S"
+        }
+      },
+      "required": ["capability", "requirement"]
+    },
+    "test": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Z][A-Z0-9]*-[0-9]{3,}-T[0-9]+$"
+        },
+        "format": {
+          "type": "string",
+          "enum": ["junit", "trx"]
+        },
+        "case": {
+          "type": "string",
+          "minLength": 1,
+          "pattern": "\\S"
+        }
+      },
+      "required": ["id", "format", "case"]
+    },
+    "retired": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Z][A-Z0-9]*-[0-9]{3,}$"
+        },
+        "reason": {
+          "type": "string",
+          "minLength": 1,
+          "pattern": "\\S"
+        },
+        "supersededBy": {
+          "type": "string",
+          "pattern": "^[A-Z][A-Z0-9]*-[0-9]{3,}$"
+        }
+      },
+      "required": ["id", "reason"]
+    }
+  }
+}
