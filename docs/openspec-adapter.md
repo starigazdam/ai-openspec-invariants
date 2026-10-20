@@ -9,7 +9,13 @@ The adapter supports OpenSpec `>=1.14.0 <2.0.0`.
 
 OpenSpec 1.14.0 adds the requirement `name` field to `show --json` output. The adapter needs
 this field to match a requirement by its exact heading. OpenSpec 1.13.x omits the field, so two
-requirements can look the same. Prerelease versions are not supported.
+requirements can look the same.
+
+A stable version can have build metadata. For example, `1.14.3+build.1` is valid. The adapter
+ignores the build metadata for the range check. The inventory reports the full version string.
+
+Prerelease versions are not supported. This rule also applies to a prerelease with build
+metadata. For example, `1.15.0-beta.1+b` is not supported.
 
 ## Commands
 
@@ -20,6 +26,10 @@ The adapter runs these commands in this order:
 3. `openspec show <id> --type spec --json` for each listed capability, one at a time.
 
 The adapter uses only the JSON output from these commands.
+
+Each capability identifier in the `list` output must be unique. A repeated identifier makes the
+output malformed. The adapter reports `OPENSPEC_OUTPUT_MALFORMED` and names both positions. The
+adapter does not run any `show` command when the list has a repeated identifier.
 
 ## How the adapter finds the CLI
 
@@ -73,7 +83,7 @@ capability.
 | `OPENSPEC_NOT_FOUND` | The package is not found, has no usable bin, or the spawn failed with `ENOENT`. |
 | `OPENSPEC_CLI_FAILED` | The command exited with a nonzero status, a signal, or a timeout. |
 | `OPENSPEC_VERSION_UNSUPPORTED` | The version is outside `>=1.14.0 <2.0.0`. |
-| `OPENSPEC_OUTPUT_MALFORMED` | The output is not JSON or does not have the required shape. |
+| `OPENSPEC_OUTPUT_MALFORMED` | The output is not JSON, does not have the required shape, or has a repeated capability identifier. |
 | `OPENSPEC_CAPABILITY_NOT_FOUND` | No capability has the exact identifier. |
 | `OPENSPEC_REQUIREMENT_NOT_FOUND` | No requirement in the capability has the exact name. |
 | `OPENSPEC_REQUIREMENT_AMBIGUOUS` | More than one requirement has the exact name. The message lists the indexes. |

@@ -301,10 +301,10 @@ function parseVersion(
   raw: string,
 ): { ok: true; version: string } | { ok: false; diagnostic: AdapterDiagnostic } {
   const version = raw.trim();
-  const match = /^(\d+)\.(\d+)\.(\d+)$/.exec(version);
+  const match = /^(\d+)\.(\d+)\.(\d+)(?:\+[0-9A-Za-z.-]+)?$/.exec(version);
 
   if (match === null) {
-    if (/^\d+\.\d+\.\d+[-+][0-9A-Za-z.-]*$/.test(version)) {
+    if (/^\d+\.\d+\.\d+-[0-9A-Za-z.-]+(?:\+[0-9A-Za-z.-]+)?$/.test(version)) {
       return {
         ok: false,
         diagnostic: {
@@ -355,6 +355,7 @@ function parseSpecIds(stdout: string, command: string): SpecIdResult {
   }
 
   const ids: string[] = [];
+  const seen = new Map<string, number>();
   for (const [position, spec] of parsed.specs.entries()) {
     if (!isRecord(spec) || typeof spec.id !== "string") {
       return {
@@ -368,6 +369,18 @@ function parseSpecIds(stdout: string, command: string): SpecIdResult {
         diagnostic: malformed(command, `specs[${position}].requirementCount`, "must be a number"),
       };
     }
+    const firstPosition = seen.get(spec.id);
+    if (firstPosition !== undefined) {
+      return {
+        ok: false,
+        diagnostic: malformed(
+          command,
+          `specs[${firstPosition}].id and specs[${position}].id`,
+          `are both "${spec.id}"`,
+        ),
+      };
+    }
+    seen.set(spec.id, position);
     ids.push(spec.id);
   }
 

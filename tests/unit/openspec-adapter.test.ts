@@ -206,7 +206,11 @@ void describe("OpenSpec adapter", () => {
     { version: "1.13.2", code: "OPENSPEC_VERSION_UNSUPPORTED" },
     { version: "2.0.0", code: "OPENSPEC_VERSION_UNSUPPORTED" },
     { version: "1.14.0" },
+    { version: "1.14.3+build.1" },
+    { version: "1.13.2+build.1", code: "OPENSPEC_VERSION_UNSUPPORTED" },
     { version: "1.15.0-beta.1", code: "OPENSPEC_VERSION_UNSUPPORTED" },
+    { version: "1.15.0-beta.1+b", code: "OPENSPEC_VERSION_UNSUPPORTED" },
+    { version: "1.14.3+", code: "OPENSPEC_OUTPUT_MALFORMED" },
     { version: "garbage", code: "OPENSPEC_OUTPUT_MALFORMED" },
   ];
 
@@ -318,6 +322,38 @@ void describe("OpenSpec adapter", () => {
       match(diagnosticOf(result).message, testCase.message);
     });
   }
+
+  void it("rejects a duplicate capability id before it runs show", () => {
+    const duplicateList = JSON.stringify({
+      specs: [
+        { id: "a", requirementCount: 0 },
+        { id: "b", requirementCount: 0 },
+        { id: "a", requirementCount: 0 },
+      ],
+      root: {},
+    });
+    const seen: string[] = [];
+    const runner: OpenSpecRunner = (args) => {
+      const key = args.join(" ");
+      seen.push(key);
+      if (key === VERSION) {
+        return response(fixture("version.txt"));
+      }
+      if (key === LIST) {
+        return response(duplicateList);
+      }
+      return { status: 1, stdout: "", stderr: `unexpected command: ${key}` };
+    };
+
+    const result = loadInventory(runner);
+
+    ok(!result.ok);
+    strictEqual(diagnosticOf(result).code, "OPENSPEC_OUTPUT_MALFORMED");
+    match(diagnosticOf(result).message, /specs\[0\]\.id/);
+    match(diagnosticOf(result).message, /specs\[2\]\.id/);
+    match(diagnosticOf(result).message, /"a"/);
+    deepEqual(seen, [VERSION, LIST]);
+  });
 
   void it("ignores unknown fields in list and show output", () => {
     const listWithExtras = JSON.stringify({
