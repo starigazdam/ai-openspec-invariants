@@ -47,4 +47,5 @@ MIT. See [LICENSE](LICENSE).
 
 - [docs/PROJECT_PLAN.md](docs/PROJECT_PLAN.md) — authoritative plan
 - [docs/architecture.md](docs/architecture.md) — module boundaries
+- [docs/openspec-adapter.md](docs/openspec-adapter.md) — OpenSpec CLI adapter and inventory
 - [Issues](https://github.com/starigazdam/ai-openspec-invariants/issues) and [milestones](https://github.com/starigazdam/ai-openspec-invariants/milestones) — backlog
