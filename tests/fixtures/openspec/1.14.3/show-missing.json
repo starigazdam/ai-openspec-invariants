@@ -1,0 +1,9 @@
+{
+  "status": [
+    {
+      "severity": "error",
+      "code": "show_error",
+      "message": "Spec 'nope' not found at /fixture/project/openspec/specs/nope/spec.md"
+    }
+  ]
+}

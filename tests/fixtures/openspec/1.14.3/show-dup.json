@@ -1,0 +1,36 @@
+{
+  "id": "dup",
+  "title": "dup",
+  "overview": "x",
+  "requirementCount": 2,
+  "requirements": [
+    {
+      "name": "Same",
+      "text": "The system SHALL a.",
+      "scenarios": [
+        {
+          "name": "s",
+          "rawText": "- **WHEN** a\n- **THEN** b"
+        }
+      ]
+    },
+    {
+      "name": "Same",
+      "text": "The system SHALL b.",
+      "scenarios": [
+        {
+          "name": "t",
+          "rawText": "- **WHEN** a\n- **THEN** b"
+        }
+      ]
+    }
+  ],
+  "metadata": {
+    "version": "1.0.0",
+    "format": "openspec"
+  },
+  "root": {
+    "path": "/fixture/project",
+    "source": "nearest"
+  }
+}
