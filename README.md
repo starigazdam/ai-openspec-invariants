@@ -51,4 +51,4 @@ MIT. See [LICENSE](LICENSE).
 
 - [docs/PROJECT_PLAN.md](docs/PROJECT_PLAN.md) — authoritative plan
 - [docs/architecture.md](docs/architecture.md) — module boundaries
-- [planning/issue-manifest.yaml](planning/issue-manifest.yaml) — issue backlog
+- [Issues](https://github.com/starigazdam/ai-openspec-invariants/issues) and [milestones](https://github.com/starigazdam/ai-openspec-invariants/milestones) — backlog
