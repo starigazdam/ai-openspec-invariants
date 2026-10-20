@@ -1,8 +1,6 @@
 # OpenSpec Invariants — Project Plan
 
-**Status:** Proposal / implementation handoff  
-**Prepared:** 2026-10-19  
-**Proposed repository:** `openspec-invariants`  
+**Status:** v0.1 specification. The backlog is in the GitHub issues and milestones of this repository.  
 **Distribution:** versioned npm CLI package (package scope chosen by maintainer)  
 **Primary audience:** engineers and AI coding agents using OpenSpec in existing repositories
 
@@ -94,7 +92,7 @@ Admit an invariant only if it is (a) materially consequential if broken, (b) end
 
 ```text
                   Standalone npm package
-             @<scope>/openspec-invariants
+             @<scope>/ai-openspec-invariants
         ┌────────────────────────────────────┐
         │ CLI: init / audit export / check    │
         │      verify / report / doctor       │
@@ -149,7 +147,7 @@ my-project/
 └── .github/workflows/...
 ```
 
-Project-wide configuration may live at `openspec-invariants.config.yaml` in the root if additional reporter settings become necessary. **Do not introduce it until there is a concrete need**; CLI flags and the registry should suffice initially.
+Project-wide configuration may live at `ai-openspec-invariants.config.yaml` in the root if additional reporter settings become necessary. **Do not introduce it until there is a concrete need**; CLI flags and the registry should suffice initially.
 
 ### `openspec/invariants.yaml` — v1 illustrative contract
 
@@ -196,7 +194,7 @@ retired:
 
 ## 7. CLI contract
 
-Proposed executable: `openspec-invariants`.
+Proposed executable: `ai-openspec-invariants`.
 
 | Command | Behavior | Writes? | CI gate? |
 | --- | --- | --- | --- |
@@ -213,16 +211,16 @@ Do not conflate `check` and `verify`: `check` works without running tests; `veri
 ### Install and use (desired DX; commands are proposed, not yet published)
 
 ```bash
-npm install --save-dev @YOUR_SCOPE/openspec-invariants
-npx openspec-invariants init --dry-run
-npx openspec-invariants init --skill
-npx openspec-invariants audit export --output invariant-audit-input.json
+npm install --save-dev @YOUR_SCOPE/ai-openspec-invariants
+npx ai-openspec-invariants init --dry-run
+npx ai-openspec-invariants init --skill
+npx ai-openspec-invariants audit export --output invariant-audit-input.json
 # AI audit reads inventory; human approves candidate merges/new invariants
-npx openspec-invariants check
-npx openspec-invariants report --write
+npx ai-openspec-invariants check
+npx ai-openspec-invariants report --write
 # after existing test commands generated JUnit and/or TRX reports:
-npx openspec-invariants verify --results 'test-results/**/*.xml' --results 'test-results/**/*.trx'
-npx openspec-invariants report --check
+npx ai-openspec-invariants verify --results 'test-results/**/*.xml' --results 'test-results/**/*.trx'
+npx ai-openspec-invariants report --check
 ```
 
 `init` never runs arbitrary package scripts or rewrites tests. It must be safe to run repeatedly. It must not replace existing OpenSpec schemas/skills. If comment-preserving config modification cannot be performed safely, **stop, show a minimal patch, and leave the file unchanged** rather than rewriting a project's YAML wholesale. `init` should not silently insert GitHub workflows; provide a template/snippet and an optional explicit future installer.
@@ -350,7 +348,7 @@ Research references verified October 19, 2026 (not drop-in dependencies):
 ## 12. Tool repository structure
 
 ```text
-openspec-invariants/
+ai-openspec-invariants/
 ├── .github/
 │   ├── workflows/ci.yml
 │   └── ISSUE_TEMPLATE/                  # optional, after backlog setup
@@ -409,7 +407,7 @@ openspec-invariants/
 - Test command and XML parsing must avoid shell injection, external entity expansion, path traversal, wildcard/substring false-positive matching, and network calls.
 - `--json` diagnostics with stable machine-readable codes; human-readable output on default; consistent nonzero exit on failures.
 - Unit tests for core; fixture-driven adapter tests; integration tests on actual small OpenSpec fixture projects; self-dogfood an invariant in the extension repository.
-- MIT (or another license chosen explicitly by maintainer) and third-party attribution review prior to release.
+- MIT license (decided) and third-party attribution review prior to release.
 - No secrets in audit exports; redact/omit environment variables, tokens, `.env`, and unrelated contents. Audit must not exfiltrate private repo material.
 
 ## 13. CI integration example
@@ -418,10 +416,10 @@ Run the consumer's normal tests first, produce *fresh* reports in a known tempor
 
 ```bash
 openspec validate --all --strict    # OpenSpec CLI installed according to official docs
-npx openspec-invariants check
+npx ai-openspec-invariants check
 # Run existing tests here, exporting JUnit XML / TRX to test-results/
-npx openspec-invariants verify --results 'test-results/**/*.xml' --results 'test-results/**/*.trx'
-npx openspec-invariants report --check
+npx ai-openspec-invariants verify --results 'test-results/**/*.xml' --results 'test-results/**/*.trx'
+npx ai-openspec-invariants report --check
 ```
 
 The executable name and report glob handling are part of the proposed API; implement and test them. Do not hard-code test suite command(s) into the library. A project with no TRX may omit that flag; the verifier still must require all formats that its registry references.
@@ -438,93 +436,9 @@ The executable name and report glob handling are part of the proposed API; imple
 - Unsupported OpenSpec version/JSON schema changes; clear failure.
 - Cross-platform fixture test on Windows and Linux (macOS optional).
 
-## 14. Issue roadmap for a lower-cost implementation agent
+## 14. Issue roadmap
 
-Create these issues in the **new** repository. Prefix title with its ID until GitHub issue numbers exist. Use labels `priority:P0/P1`, `area:core/cli/integration/tests/docs`, `type:feature/chore`, `milestone:v0.1`. Respect dependencies. Do not implement the full roadmap during bootstrap.
-
-### I-01 — Bootstrap package, TypeScript CLI and quality gates
-**Priority:** P0 · **Depends:** none · **Labels:** `area:core`, `type:chore`
-
-**Scope:** Initialize standalone npm package, TypeScript strict mode, CLI binary with `--help` and `--version`, error/exit code conventions, test runner, formatting/linting, CI for Linux and Windows, README, license choice placeholder, basic security/dependency checks.
-
-**Acceptance:** `npm ci`, build, lint, typecheck, test all pass; packed local tarball executable works; CI passes on clean clone; no application-specific logic.
-
-### I-02 — Define invariant data model, schema and fixtures
-**Priority:** P0 · **Depends:** I-01 · **Labels:** `area:core`, `type:feature`
-
-**Scope:** Author JSON Schema/Zod (decide one), active/retired records, immutable IDs, canonical spec locator, consumers, optional implementation hints, reporter-specific test identities, schema-version validation, positive/negative fixtures and user docs.
-
-**Acceptance:** All fields documented; active-without-tests rejected; retired ID reuse rejected; duplicate IDs rejected; unknown fields handled consistently; fixtures and unit tests shipped.
-
-### I-03 — OpenSpec adapter and current-spec inventory
-**Priority:** P0 · **Depends:** I-01 · **Labels:** `area:integration`, `type:feature`
-
-**Scope:** Invoke the supported OpenSpec CLI as a subprocess; use documented JSON outputs to load current capabilities, requirement headings and source locators; validate version; handle malformed/changed output; no archived change parsing for canonical ownership.
-
-**Acceptance:** Small consumer fixture resolves owner and consumers; missing/ambiguous spec/requirement fails with actionable location; no OpenSpec internals dependency; version/CLI failure fixtures pass.
-
-### I-04 — Deterministic `check` (static integrity)
-**Priority:** P0 · **Depends:** I-02, I-03 · **Labels:** `area:core`, `type:feature`
-
-**Scope:** Implement registry-to-OpenSpec cross-reference validation, ID uniqueness, stable diagnostics, optional implementation path sanity checks, `--json`, zero/nonzero exit semantics.
-
-**Acceptance:** Negative fixtures for every failure mode; cannot succeed on unresolved OpenSpec references or testless active invariant; commands are read-only.
-
-### I-05 — JUnit XML test-result verification
-**Priority:** P0 · **Depends:** I-02, I-04 · **Labels:** `area:tests`, `type:feature`
-
-**Scope:** Implement exact JUnit test-case normalization and `verify --results`, fail-closed statuses and duplicate/missing identities; reject unsafe XML. Supply Vitest/Jest fixture documentation.
-
-**Acceptance:** Exact mapped passing tests verify; missing/skip/fail/ambiguous/zero test cases fail; malformed XML produces diagnostic not success; tests do not need to execute twice.
-
-### I-06 — Deterministic Markdown index generator
-**Priority:** P0 · **Depends:** I-02, I-03, I-04 · **Labels:** `area:cli`, `type:feature`
-
-**Scope:** `report --write` and `report --check`; active index grouped by owner, anchored invariant details, links to canonical spec/requirement, consumers, test IDs; no unverifiable "passed" status in committed index.
-
-**Acceptance:** Byte-for-byte deterministic sorted output; stale file fails `--check`; idempotent generation; all links resolve within consumer project where representable.
-
-### I-07 — Safe `init`, OpenSpec guidance and optional skill installer
-**Priority:** P0 · **Depends:** I-01, I-02 · **Labels:** `area:integration`, `type:feature`
-
-**Scope:** `init --dry-run`, `init --skill`, safe config guidance insertion (or patch preview if comments cannot be preserved), registry scaffold, optional skill to `.agents/skills`, no OpenSpec workflow fork, preserve user config and generated OpenSpec files.
-
-**Acceptance:** init twice produces zero further diff; unrelated `config.yaml` fields/comments and custom schemas survive; unsupported OpenSpec project fails safely; optional skill install/version docs clear; dry-run never writes.
-
-### I-08 — .NET TRX verification adapter
-**Priority:** P1 · **Depends:** I-05 · **Labels:** `area:tests`, `type:feature`
-
-**Scope:** Normalize TRX test identity, associate execution outcomes, fail closed on skipped/duplicate/missing, mixed JUnit+TRX inputs, real xUnit+dotnet test fixtures. Confirm exactly what test metadata TRX actually exports.
-
-**Acceptance:** Real xUnit TRX fixture verifies; skip/fail/notrun/ambiguous identity fail; mixed JS+.NET test reports correctly validate their own declared invariants.
-
-### I-09 — Deterministic `audit export` and read-only AI audit skill
-**Priority:** P1 · **Depends:** I-03, I-07 · **Labels:** `area:integration`, `type:feature`
-
-**Scope:** Export inventory with source locators; ship skill/prompt for semantic duplicate/conflict, canonical ownership, parallel implementation, and missing guarantee proposals. Avoid LLM API inside CLI; no repo modifications from audit.
-
-**Acceptance:** Repeatable input bundle; findings template includes evidence/impact/confidence/owner suggestion; candidate additions are never silently promoted; no unrelated sensitive file contents exported.
-
-### I-10 — CI examples and end-to-end consumer repos
-**Priority:** P0 · **Depends:** I-04, I-05, I-06, I-07 · **Labels:** `area:integration`, `type:chore`
-
-**Scope:** Minimal TypeScript OpenSpec consumer, reusable GitHub Actions snippet, full check/test/report flow and regression scenarios, cross-platform validation. Add .NET example once I-08 lands.
-
-**Acceptance:** Green sample succeeds from clean checkout; removing an invariant test or breaking spec owner fails CI; no stale local artifacts needed; test reports generated in workflow.
-
-### I-11 — Documentation, security audit and pre-release packaging
-**Priority:** P1 · **Depends:** I-05, I-06, I-07, I-09, I-10 · **Labels:** `area:docs`, `type:chore`
-
-**Scope:** README quickstart, architecture/CLI/schema/migration guides, release/version compatibility policy, dependency/license audit, package contents audit, security assessment (subprocess/XML/path/config input). Keep release private/unpublished until maintainer approval.
-
-**Acceptance:** A second repo can follow docs and install from packed package; no accidental secret/network access; tests/lint/typecheck pass; changelog/release checklist exists; maintainers explicitly approve publication.
-
-### I-12 — Brownfield adoption playbook and hard-gate demonstration
-**Priority:** P1 · **Depends:** I-08, I-09, I-10 · **Labels:** `area:docs`, `type:feature`
-
-**Scope:** Document and exercise real migration: scan existing specs, classify candidate invariants, approve owners, create tests, activate registry, CI hard gate, archive conflicting duplicates through normal OpenSpec change process.
-
-**Acceptance:** Walkthrough starts from nontrivial sample repo; audit report is read-only; an untested candidate cannot become active; tests break on deliberately introduced duplicate ID, dead reference, missing test, and failed test.
+The v0.1 issues I-01 to I-12 are [GitHub issues](https://github.com/starigazdam/ai-openspec-invariants/issues) in this repository. Each issue title starts with its logical ID. The issue body holds its scope, acceptance criteria and dependencies. Labels and [milestones](https://github.com/starigazdam/ai-openspec-invariants/milestones) follow §15.
 
 ### Deferred (not v0.1 gate)
 
@@ -561,13 +475,13 @@ Build *deterministic enforcement before AI audit automation*. The first valuable
 | AI audit leaks private code | Local inventory, explicit user-mediated agent access, no implicit external API |
 | Excessive invariants | Admission criteria and human review; no requirement-to-invariant promotion by default |
 
-### Proposed decisions for maintainer confirmation (do not block bootstrap)
+### Decisions for maintainer confirmation
 
-- npm organization/scope and published package name.
-- Public/private repo status and license.
-- Exact Node.js support matrix and package manager for development.
-- JUnit identity normalization contract and TRX mapping convention based on real fixtures.
-- Whether `.agents/skills` installation is default or `--skill` opt-in (proposal: opt-in).
+- Decided: package and CLI name `ai-openspec-invariants`, MIT license, public repository.
+- Decided: Node.js 22 and 24 with npm (I-01 CI matrix).
+- Open: npm organization/scope for publication. Publication needs maintainer approval.
+- Open: JUnit identity normalization contract and TRX mapping convention based on real fixtures.
+- Open: whether `.agents/skills` installation is default or `--skill` opt-in (proposal: opt-in).
 
 ## 17. Definition of done for v0.1
 
@@ -580,17 +494,3 @@ Build *deterministic enforcement before AI audit automation*. The first valuable
 - Initial brownfield example demonstrates detecting duplicate/contradictory specs and migration into a canonical invariant.
 - Unit, integration, cross-platform, compatibility and security tests pass; examples/docs are accurate.
 - There is no dependency on an external LLM service, server, database, or another spec management framework.
-
-## 18. Delegation contract — instructions for repository bootstrap agent
-
-> You are bootstrapping a new standalone repository according to this project plan. **Do not implement the entire product**. Prepare a maintainable baseline and an actionable GitHub backlog for a subsequent implementation agent.
->
-> 1. Read this document completely. Verify tools and the selected GitHub repository identity before writes; do not assume it exists.
-> 2. Initialize an npm/TypeScript repository with strict type checking, `bin` CLI placeholder, quality scripts, a minimal test, CI, README, docs copy of this plan, and sensible `.gitignore`. Create a first OpenSpec change describing the project itself only if OpenSpec is available and doing so will not obstruct the scaffold.
-> 3. Preserve the plan as `docs/PROJECT_PLAN.md`; derive `docs/ARCHITECTURE.md` / `docs/ROADMAP.md` only where useful, without inventing functionality.
-> 4. Prepare GitHub Issues corresponding to I-01 through I-12 above. Use scoped deliverables, measurable acceptance criteria, dependencies, priorities, labels, and milestones. If asked to *create* issues and an authenticated GitHub tool is available, do so; otherwise write import-ready issue bodies in `planning/issues/` and a manifest mapping logical IDs to dependencies. Never fabricate issue URLs or numbers.
-> 5. Avoid copy-pasting code from referenced projects until licenses are checked. Links are research references, not requirements to install them.
-> 6. Do not publish npm packages, make unrelated changes, add secrets, contact external services without authorization, or claim unimplemented commands work.
-> 7. Produce a final handoff stating files created, commands/tests run, which issue tickets were actually created, decisions still open, and the first recommended implementation issue.
->
-> **Stop condition:** a buildable skeleton, clear architecture documentation, and fully specified backlog. Leave implementation of adapter/registry/verification to the follow-up issues.
