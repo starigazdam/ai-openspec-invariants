@@ -21,3 +21,6 @@ decisions [§16](PROJECT_PLAN.md#decisions-for-maintainer-confirmation).
 Dependency direction: `cli` → (`integration`, `adapters`, `render`) → `core`.
 `core` imports no other module. Adapters convert external data into core types
 at the boundary. Add a module or file only when an issue needs it.
+
+The OpenSpec adapter uses only the published CLI JSON; see
+[openspec-adapter.md](openspec-adapter.md) for its range, model and limits.

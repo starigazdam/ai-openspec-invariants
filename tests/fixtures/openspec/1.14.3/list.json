@@ -1,0 +1,16 @@
+{
+  "specs": [
+    {
+      "id": "execution-identity",
+      "requirementCount": 2
+    },
+    {
+      "id": "manual-execution",
+      "requirementCount": 1
+    }
+  ],
+  "root": {
+    "path": "/fixture/project",
+    "source": "nearest"
+  }
+}

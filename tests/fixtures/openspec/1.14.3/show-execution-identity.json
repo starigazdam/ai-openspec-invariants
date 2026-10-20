@@ -1,0 +1,36 @@
+{
+  "id": "execution-identity",
+  "title": "execution-identity",
+  "overview": "Identity of executions.",
+  "requirementCount": 2,
+  "requirements": [
+    {
+      "name": "Single active execution",
+      "text": "The system SHALL reject overlapping executions.",
+      "scenarios": [
+        {
+          "name": "Concurrent start",
+          "rawText": "- **WHEN** two starts happen\n- **THEN** one is rejected"
+        }
+      ]
+    },
+    {
+      "name": "Restart keeps lock",
+      "text": "The system SHALL keep the lock.",
+      "scenarios": [
+        {
+          "name": "Restart",
+          "rawText": "- **WHEN** restarted\n- **THEN** lock kept"
+        }
+      ]
+    }
+  ],
+  "metadata": {
+    "version": "1.0.0",
+    "format": "openspec"
+  },
+  "root": {
+    "path": "/fixture/project",
+    "source": "nearest"
+  }
+}

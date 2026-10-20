@@ -1,0 +1,26 @@
+{
+  "id": "manual-execution",
+  "title": "manual-execution",
+  "overview": "Manual runs.",
+  "requirementCount": 1,
+  "requirements": [
+    {
+      "name": "Manual start",
+      "text": "The system SHALL start manually.",
+      "scenarios": [
+        {
+          "name": "Start",
+          "rawText": "- **WHEN** user clicks\n- **THEN** it starts"
+        }
+      ]
+    }
+  ],
+  "metadata": {
+    "version": "1.0.0",
+    "format": "openspec"
+  },
+  "root": {
+    "path": "/fixture/project",
+    "source": "nearest"
+  }
+}
