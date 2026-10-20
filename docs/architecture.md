@@ -1,15 +1,12 @@
 # Architecture
 
-`docs/PROJECT_PLAN.md` is the authoritative specification. This file adds only
-the module boundaries for `src/`. For responsibilities see plan §5, for the
-CLI contract §7, for verification rules §8, for engineering choices §12, and
-for open decisions §16.
-
-## Status
-
-Only the I-01 skeleton exists: a CLI entry point with `--help` and `--version`.
-No command in the CLI contract is implemented yet. The CLI must not claim that
-one works.
+[PROJECT_PLAN.md](PROJECT_PLAN.md) is the authoritative specification. This
+file adds only the module boundaries for `src/`. For responsibilities read
+[plan §5](PROJECT_PLAN.md#5-architecture), for the CLI contract
+[§7](PROJECT_PLAN.md#7-cli-contract), for verification rules
+[§8](PROJECT_PLAN.md#8-deterministic-integrity-and-verification), for
+engineering choices [§12](PROJECT_PLAN.md#engineering-choices), and for open
+decisions [§16](PROJECT_PLAN.md#decisions-for-maintainer-confirmation).
 
 ## Modules
 

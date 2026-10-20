@@ -438,7 +438,7 @@ The executable name and report glob handling are part of the proposed API; imple
 
 ## 14. Issue roadmap
 
-The v0.1 issues I-01 to I-12 are GitHub issues in this repository. Each issue title starts with its logical ID. The issue body holds its scope, acceptance criteria and dependencies. Labels and milestones follow §15.
+The v0.1 issues I-01 to I-12 are [GitHub issues](https://github.com/starigazdam/ai-openspec-invariants/issues) in this repository. Each issue title starts with its logical ID. The issue body holds its scope, acceptance criteria and dependencies. Labels and [milestones](https://github.com/starigazdam/ai-openspec-invariants/milestones) follow §15.
 
 ### Deferred (not v0.1 gate)
 

@@ -1,10 +1,6 @@
 # ai-openspec-invariants
 
-A thin, independently installable invariant governance layer on top of OpenSpec. It owns a small,
-curated inventory of durable cross-capability guarantees, links each to one canonical OpenSpec
-requirement, records its consumers and reusable implementation, and requires automated passing test
-evidence for every active invariant. OpenSpec keeps owning requirements, change proposals, scenarios,
-and their lifecycle; this package does not replace it.
+Invariant governance layer on top of OpenSpec. For the purpose and scope, read [plan §1](docs/PROJECT_PLAN.md#1-executive-summary) and [§4](docs/PROJECT_PLAN.md#4-scope-and-explicit-non-goals).
 
 **Status:** Skeleton only: no invariant is checked or enforced yet. None of the planned commands
 (`init`, `doctor`, `audit export`, `check`, `verify`, `report`) is implemented. This package is
